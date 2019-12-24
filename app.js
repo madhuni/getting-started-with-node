@@ -2,10 +2,11 @@ const express = require('express');
 const bodyPaser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
+const figlet = require('figlet');
 // Setting up the required packages for MongoDB
 const mongoose = require('mongoose');
 
-const { config, dbOptions, connectionString } = require('./config/db.config');
+const { dbOptions, connectionString } = require('./config/db.config');
 const indexRouter = require('./routes/index');
 const coursesRouter = require('./routes/courses');
 const lessonsRouter = require('./routes/lessons');
@@ -48,6 +49,13 @@ app.listen(port, hostname, () => {
     if (err) {
       console.log(err);
     }
+  });
+  figlet('Welcome To Node Server', function(err, data) {
+    if (err) {
+      console.log('Something is wrong with Figlet.');
+      return;
+    }
+    console.log(data);
   });
   console.log(`Server is up and running at http://${hostname}:${port}`);
 });

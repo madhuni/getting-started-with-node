@@ -15,7 +15,6 @@ const dbOptions = {
 const connectionString = `mongodb+srv://${config.username}:${config.password}@${config.hostName}/${config.dbName}?${config.options}`;
 
 module.exports = {
-  config,
   dbOptions,
   connectionString
 }
