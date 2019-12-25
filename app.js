@@ -3,10 +3,11 @@ const bodyPaser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const figlet = require('figlet');
+const chalk = require('chalk');
 // Setting up the required packages for MongoDB
 const mongoose = require('mongoose');
 
-const { dbOptions, connectionString } = require('./config/db.config');
+const { dbOptions, remoteConnectionString, localConnectionString } = require('./config/db.config');
 const indexRouter = require('./routes/index');
 const coursesRouter = require('./routes/courses');
 const lessonsRouter = require('./routes/lessons');
@@ -44,18 +45,25 @@ app.get('/favicon.ico', function(req, res) {
   res.send('assets/favicon.ico');
 });
 
-app.listen(port, hostname, () => {
-  mongoose.connect(connectionString, dbOptions, (err) => {
-    if (err) {
-      console.log(err);
-    }
-  });
-  figlet('Welcome To Node Server', function(err, data) {
-    if (err) {
-      console.log('Something is wrong with Figlet.');
-      return;
-    }
-    console.log(data);
-  });
-  console.log(`Server is up and running at http://${hostname}:${port}`);
+/**
+ * Connect to the DB first and after the connection is established
+ * successfully then start the Node server.
+ */
+mongoose.connect(localConnectionString, dbOptions, (err) => {
+  if (err) {
+    console.log(chalk.red(`Unable to Connect to the server!`), err);
+    process.exit(1);
+  } else {
+    // Start the APP once the DB is connected
+    app.listen(port, hostname, () => {
+      figlet('Welcome To Node Server', function(err, data) {
+        if (err) {
+          console.log('Something is wrong with Figlet.');
+          return;
+        }
+        console.log(data);
+      });
+      console.log(chalk.green(`Server is up and running at http://${hostname}:${port}`));
+    });
+  }
 });

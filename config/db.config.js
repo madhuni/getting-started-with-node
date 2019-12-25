@@ -12,9 +12,12 @@ const dbOptions = {
   useFindAndModify: false
 };
 
-const connectionString = `mongodb+srv://${config.username}:${config.password}@${config.hostName}/${config.dbName}?${config.options}`;
+const remoteConnectionString = `mongodb+srv://${config.username}:${config.password}@${config.hostName}/${config.dbName}?${config.options}`;
+
+const localConnectionString = `mongodb://127.0.0.1:27017/test-db?compressors=zlib&gssapiServiceName=mongodb`;
 
 module.exports = {
   dbOptions,
-  connectionString
+  remoteConnectionString,
+  localConnectionString
 }
