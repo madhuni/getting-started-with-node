@@ -1,6 +1,5 @@
-'use strict';
+import mongoose from "mongoose";
 
-const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Creating a UserSchema
@@ -11,5 +10,4 @@ const UserSchema = new Schema({
   contactNo: { type: String, required: true}
 });
 
-// Exposing the Mongoose Model with name 'User' of type 'UserSchema'
-module.exports = mongoose.model('User', UserSchema);
+export const User = mongoose.model("User", UserSchema);
