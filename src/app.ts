@@ -1,4 +1,5 @@
 import * as bodyParser from "body-parser";
+import chalk from "chalk";
 import cors from "cors";
 import express, { Express, Request, Response } from "express";
 import figlet from "figlet";
@@ -6,7 +7,7 @@ import mongoose from "mongoose";
 import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
-import { connectionString, dbOptions } from "./config/db.config";
+import { dbOptions, localConnectionString, remoteConnectionString } from "./config/db.config";
 import { router as CoursesApiRouter } from "./routes/courses";
 import { router as IndexRouter } from "./routes/index";
 import { router as LessonsApiRouter } from "./routes/lessons";
@@ -23,7 +24,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsConfig));
 
 // Using CUSTOM MIDDLEWARE
-console.log(__dirname);
 app.use("/assets", express.static(path.join(__dirname + "/public")));
 app.use("/", (req: Request, res: Response, next) => {
   console.log({
@@ -43,18 +43,25 @@ app.get("/favicon.ico", (req: Request, res: Response) => {
   res.send("assets/favicon.ico");
 });
 
-app.listen(port, hostname, () => {
-  mongoose.connect(connectionString, dbOptions, (err) => {
-    if (err) {
-      console.log(err);
-    }
-  });
-  figlet("Welcome To Node Server", (err, data) => {
-    if (err) {
-      console.log("Something is wrong with Figlet.");
-      return;
-    }
-    console.log(data);
-  });
-  console.log(`Server is up and running at http://${hostname}:${port}`);
+/**
+ * Connect to the DB first and after the connection is established
+ * successfully then start the Node server.
+ */
+mongoose.connect(localConnectionString, dbOptions, (err) => {
+  if (err) {
+    console.log(chalk.red(`Unable to Connect to the server!`), err);
+    process.exit(1);
+  } else {
+    // Start the APP once the DB is connected
+    app.listen(port, hostname, () => {
+      figlet("Welcome To Node Server", function(err, data) {
+        if (err) {
+          console.log("Something is wrong with Figlet.");
+          return;
+        }
+        console.log(data);
+      });
+      console.log(chalk.green(`Server is up and running at http://${hostname}:${port}`));
+    });
+  }
 });
