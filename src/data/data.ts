@@ -1,4 +1,4 @@
-const COURSES = {
+export const COURSES = {
   0: {
     id: 0,
     description: "RxJS In Practice Course",
@@ -46,7 +46,7 @@ const COURSES = {
   },
 };
 
-const LESSONS = {
+export const LESSONS = {
   1: {
     id: 1,
     description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
@@ -75,9 +75,4 @@ const LESSONS = {
     seqNo: 4,
     courseId: 3
   },
-}
-
-module.exports = {
-  COURSES: COURSES,
-  LESSONS: LESSONS
-}
+};
