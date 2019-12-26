@@ -1,4 +1,4 @@
-export const COURSES = {
+export const COURSES: any = {
   0: {
     id: 0,
     description: "RxJS In Practice Course",
@@ -46,7 +46,7 @@ export const COURSES = {
   },
 };
 
-export const LESSONS = {
+export const LESSONS: any = {
   1: {
     id: 1,
     description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
