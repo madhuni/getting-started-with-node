@@ -33,8 +33,8 @@ export class UsersService {
   }
 
   public addUser(req: Request, res: Response): void {
-    const user: any = new User(req.body);
-    user.save((err: Error, user: MongooseDocument) => {
+    const newUser: any = new User(req.body);
+    newUser.save((err: Error, user: MongooseDocument) => {
       if (err) {
         res.status(400).json({
           message: err.message
