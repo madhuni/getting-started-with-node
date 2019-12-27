@@ -18,7 +18,7 @@ export class UsersController {
      * Same Routes can be chained together
      */
     this.router.route("/")
-      .get(usersService.getUser)
+      .get(usersService.getUsers)
       .post(usersService.addUser);
 
     this.router.route("/:id")
