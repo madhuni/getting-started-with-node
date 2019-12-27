@@ -1,6 +1,6 @@
 import express, { Application, Router } from "express";
 
-import { CoursesService } from "../services/courses.service";
+import { CoursesService } from "../services";
 
 export class CoursesController {
 

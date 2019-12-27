@@ -1,6 +1,6 @@
 import { Application } from "express";
 
-import { CommonService } from "../services/common.service";
+import { CommonService } from "../services";
 
 export class MainController {
 

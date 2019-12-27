@@ -7,11 +7,8 @@ import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
 import { dbOptions, localConnectionString } from "./config/db.config";
-import { CoursesController } from "./controllers/courses.controller";
-import { LessonsController } from "./controllers/lessons.controller";
-import { MainController } from "./controllers/main.controller";
-import { UsersController } from "./controllers/users.controller";
-import { CommonService } from "./services/common.service";
+import { CoursesController, LessonsController, MainController, UsersController } from "./controllers";
+import { CommonService } from "./services";
 
 class App {
 
@@ -26,17 +23,16 @@ class App {
   constructor() {
     this.app = express();
     this._commonSvc = new CommonService();
-    // Setup the MongoDB first and then setup the Middlewares and Controllers
+    this.setMiddlewares();
+    this.setControllers();
     this.setMongoConfig()
       .then((res: Mongoose) => {
         console.log(
           chalk.green(`Connected to MongoDB successfully!`)
         );
-        this.setMiddlewares();
-        this.setControllers();
       })
       .catch((err: Error) => {
-        console.log(chalk.red(`Unable to Connect to the MongoDB!`), err);
+        console.log(chalk.red(`Unable to Connect to the MongoDB! Terminating the process.`), err);
         process.exit(1);
       });
   }
