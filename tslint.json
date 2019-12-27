@@ -13,6 +13,7 @@
         "quotemark": [true, "double"],
         "semicolon": [true, "always"],
         "space-before-function-paren": [true, "never"],
+        "member-ordering": false,
         "no-string-literal": false,
         "ordered-imports": [
             true,

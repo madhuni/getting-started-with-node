@@ -6,10 +6,17 @@
     "target": "es6", // output language level
     "moduleResolution": "node", // for mimicing the Node resolution mechanicsm
     "sourceMap": true,
-    "outDir": "dist" // directory for all the compiled JS
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "outDir": "dist", // directory for all the compiled JS
+    "removeComments": true,
+    "strict": true
   },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "./src/public/"],
   "lib": ["es2015"],
   "paths": {
-    "@app/": ["./src/*"]
+    "@app/*": ["./src/*"],
+    "@project-root/*": ["./*"]
   }
 }

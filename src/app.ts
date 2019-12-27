@@ -1,67 +1,63 @@
 import * as bodyParser from "body-parser";
 import chalk from "chalk";
 import cors from "cors";
-import express, { Express, Request, Response } from "express";
-import figlet from "figlet";
-import mongoose from "mongoose";
+import express, { Application } from "express";
+import mongoose, { Mongoose } from "mongoose";
 import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
-import { dbOptions, localConnectionString, remoteConnectionString } from "./config/db.config";
-import { router as CoursesApiRouter } from "./routes/courses";
-import { router as IndexRouter } from "./routes/index";
-import { router as LessonsApiRouter } from "./routes/lessons";
-import { router as UsersApiRouter } from "./routes/users";
+import { dbOptions, localConnectionString } from "./config/db.config";
+import { CoursesController, LessonsController, MainController, UsersController } from "./controllers";
+import { commonService } from "./services";
 
-const app: Express = express();
-// Setting up the port from the Environment Variable
-const port = +process.env.PORT || 1400;
-const hostname = "localhost";
+class App {
 
- // Using MIDDLEWARE
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors(corsConfig));
+  public app: Application;
+  public mainController!: MainController;
+  public lessonsController!: LessonsController;
+  public coursesController!: CoursesController;
+  public usersController!: UsersController;
 
-// Using CUSTOM MIDDLEWARE
-app.use("/assets", express.static(path.join(__dirname + "/public")));
-app.use("/", (req: Request, res: Response, next) => {
-  console.log({
-    RequestUrl: req.url,
-    RequestMethod: req.method,
-    IsRequestSecure: req.secure,
-    RequestIP: req.ip,
-  });
-  next(); // this will run the method with the matching route once the middleware done the things it needs to do
-});
-app.use("/", IndexRouter);
-app.use("/api/courses", CoursesApiRouter);
-app.use("/api/lessons", LessonsApiRouter);
-app.use("/api/users", UsersApiRouter);
+  constructor() {
+    this.app = express();
+    this.setMiddlewares();
+    this.setControllers();
+    this.setMongoConfig();
+  }
 
-app.get("/favicon.ico", (req: Request, res: Response) => {
-  res.send("assets/favicon.ico");
-});
+  private setMiddlewares(): void {
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: true }));
+    this.app.use(cors(corsConfig));
+    this.app.use("/", commonService.logIncomingRequestDetails);
+    this.app.use("/assets", express.static(path.join(__dirname + "/public")));
+  }
 
-/**
- * Connect to the DB first and after the connection is established
- * successfully then start the Node server.
- */
-mongoose.connect(localConnectionString, dbOptions, (err) => {
-  if (err) {
-    console.log(chalk.red(`Unable to Connect to the server!`), err);
-    process.exit(1);
-  } else {
-    // Start the APP once the DB is connected
-    app.listen(port, hostname, () => {
-      figlet("Welcome To Node Server", function(err, data) {
-        if (err) {
-          console.log("Something is wrong with Figlet.");
-          return;
-        }
-        console.log(data);
+  private setMongoConfig(): void {
+    mongoose.connect(localConnectionString, dbOptions)
+      .then((res: Mongoose) => {
+        console.log(
+          chalk.green(`Connected to MongoDB successfully!`)
+        );
+      })
+      .catch((err: Error) => {
+        console.log(chalk.red(`Unable to Connect to the MongoDB! Terminating the process.`), err);
+        process.exit(1);
       });
-      console.log(chalk.green(`Server is up and running at http://${hostname}:${port}`));
+
+    mongoose.connection.on("disconnected", () => {
+      console.error(
+        chalk.red("MongoDB disconnected!")
+      );
     });
   }
-});
+
+  private setControllers(): void {
+    this.mainController = new MainController(this.app);
+    this.lessonsController = new LessonsController(this.app);
+    this.coursesController = new CoursesController(this.app);
+    this.usersController = new UsersController(this.app);
+  }
+}
+
+export default new App().app;
