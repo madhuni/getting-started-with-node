@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import { COURSES } from "../data/data";
 
-export class CoursesService {
+class CoursesService {
 
   private currentId = 4;
 
@@ -41,3 +41,5 @@ export class CoursesService {
     res.json(COURSES[this.currentId]);
   }
 }
+
+export default Object.freeze(new CoursesService());

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import { LESSONS } from "../data/data";
 
-export class LessonsService {
+class LessonsService {
 
   public getLessons(req: Request, res: Response): void {
     const data = {
@@ -20,3 +20,5 @@ export class LessonsService {
     }
   }
 }
+
+export default Object.freeze(new LessonsService());

@@ -8,7 +8,7 @@ import * as path from "path";
 import { options as corsConfig } from "./config/cors.config";
 import { dbOptions, localConnectionString } from "./config/db.config";
 import { CoursesController, LessonsController, MainController, UsersController } from "./controllers";
-import { CommonService } from "./services";
+import { commonService } from "./services";
 
 class App {
 
@@ -18,14 +18,23 @@ class App {
   public coursesController!: CoursesController;
   public usersController!: UsersController;
 
-  private _commonSvc: CommonService;
-
   constructor() {
     this.app = express();
-    this._commonSvc = new CommonService();
     this.setMiddlewares();
     this.setControllers();
-    this.setMongoConfig()
+    this.setMongoConfig();
+  }
+
+  private setMiddlewares(): void {
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: true }));
+    this.app.use(cors(corsConfig));
+    this.app.use("/", commonService.logIncomingRequestDetails);
+    this.app.use("/assets", express.static(path.join(__dirname + "/public")));
+  }
+
+  private setMongoConfig(): void {
+    mongoose.connect(localConnectionString, dbOptions)
       .then((res: Mongoose) => {
         console.log(
           chalk.green(`Connected to MongoDB successfully!`)
@@ -35,19 +44,12 @@ class App {
         console.log(chalk.red(`Unable to Connect to the MongoDB! Terminating the process.`), err);
         process.exit(1);
       });
-  }
 
-  private setMiddlewares(): void {
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: true }));
-    this.app.use(cors(corsConfig));
-    this.app.use("/", this._commonSvc.logIncomingRequestDetails);
-    this.app.use("/assets", express.static(path.join(__dirname + "/public")));
-  }
-
-  private setMongoConfig(): Promise<Mongoose> {
-    mongoose.Promise = global.Promise;
-    return mongoose.connect(localConnectionString, dbOptions);
+    mongoose.connection.on("disconnected", () => {
+      console.error(
+        chalk.red("MongoDB disconnected!")
+      );
+    });
   }
 
   private setControllers(): void {

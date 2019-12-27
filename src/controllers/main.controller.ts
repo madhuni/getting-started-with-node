@@ -1,18 +1,15 @@
 import { Application } from "express";
 
-import { CommonService } from "../services";
+import { commonService } from "../services";
 
 export class MainController {
 
-  private _commonSvc: CommonService;
-
   constructor(private app: Application) {
-    this._commonSvc = new CommonService();
     this.setupRoutes();
   }
 
   public setupRoutes(): void {
-    this.app.route("/").get(this._commonSvc.showWelcomeMessage);
-    this.app.route("/favicon.ico").get(this._commonSvc.getFavicon);
+    this.app.route("/").get(commonService.showWelcomeMessage);
+    this.app.route("/favicon.ico").get(commonService.getFavicon);
   }
 }

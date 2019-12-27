@@ -1,6 +1,6 @@
 import {  NextFunction, Request, Response } from "express";
 
-export class CommonService {
+class CommonService {
   public showWelcomeMessage(req: Request, res: Response): void {
     res.send(`
       <html>
@@ -28,3 +28,5 @@ export class CommonService {
     next();
   }
 }
+
+export default Object.freeze(new CommonService());

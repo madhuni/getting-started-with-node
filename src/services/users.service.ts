@@ -3,7 +3,7 @@ import { MongooseDocument } from "mongoose";
 
 import { User } from "../models/user.model";
 
-export class UsersService {
+class UsersService {
 
   public getUsers(req: Request, res: Response): void {
     User.find({}, (err: Error, users: MongooseDocument) => {
@@ -74,3 +74,12 @@ export class UsersService {
     });
   }
 }
+
+/**
+ * Exporting the Service as SINGLETON service
+ *
+ * We are using `Object.freeze()` method for the new instance created
+ * so that the methods of the `UsersService` can not be overriden from the
+ * consuming code.
+ */
+export default Object.freeze(new UsersService());

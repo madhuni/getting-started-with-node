@@ -1,15 +1,13 @@
 import express, { Application, Router } from "express";
 
-import { UsersService } from "../services";
+import { usersService } from "../services";
 
 export class UsersController {
 
   private router: Router;
-  private _usersSvc: UsersService;
 
   constructor(private app: Application) {
     this.router = express.Router();
-    this._usersSvc = new UsersService();
     this.setupRoutes();
   }
 
@@ -20,12 +18,12 @@ export class UsersController {
      * Same Routes can be chained together
      */
     this.router.route("/")
-      .get(this._usersSvc.getUsers)
-      .post(this._usersSvc.addUser);
+      .get(usersService.getUser)
+      .post(usersService.addUser);
 
     this.router.route("/:id")
-      .get(this._usersSvc.getUser)
-      .put(this._usersSvc.updateUser)
-      .delete(this._usersSvc.deleteUser);
+      .get(usersService.getUser)
+      .put(usersService.updateUser)
+      .delete(usersService.deleteUser);
   }
 }
