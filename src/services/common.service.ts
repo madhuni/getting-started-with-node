@@ -1,4 +1,4 @@
-import {  NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 
 class CommonService {
   public showWelcomeMessage(req: Request, res: Response): void {
@@ -16,16 +16,6 @@ class CommonService {
 
   public getFavicon(req: Request, res: Response): void {
     res.send("assets/favicon.ico");
-  }
-
-  public logIncomingRequestDetails(req: Request, res: Response, next: NextFunction): void {
-    console.log({
-      RequestUrl: req.url,
-      RequestMethod: req.method,
-      IsRequestSecure: req.secure,
-      RequestIP: req.ip,
-    });
-    next();
   }
 }
 
