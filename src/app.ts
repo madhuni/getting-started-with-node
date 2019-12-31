@@ -8,7 +8,7 @@ import * as path from "path";
 import { options as corsConfig } from "./config/cors.config";
 import { dbOptions, localConnectionString } from "./config/db.config";
 import { CoursesController, LessonsController, MainController, UsersController } from "./controllers";
-import { commonService } from "./services";
+import { logIncomingRequestDetails } from "./middleware";
 
 class App {
 
@@ -29,7 +29,7 @@ class App {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(cors(corsConfig));
-    this.app.use("/", commonService.logIncomingRequestDetails);
+    this.app.use("/", logIncomingRequestDetails);
     this.app.use("/assets", express.static(path.join(__dirname + "/public")));
   }
 
