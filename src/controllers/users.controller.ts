@@ -11,17 +11,16 @@ export class UsersController {
     this.setupRoutes();
   }
 
-  public setupRoutes(): void {
+  private setupRoutes(): void {
     this.app.use("/api/users", this.router);
 
-    /**
-     * Same Routes can be chained together
-     */
     this.router.route("/")
       .get(usersService.getUsers.bind(usersService));
 
     this.router.route("/register")
-      .post(usersService.userValidationRules(), usersService.registerUser.bind(usersService));
+      .post(
+        usersService.userValidationRules(), usersService.registerUser.bind(usersService)
+      );
 
     this.router.route("/:id")
       .get(usersService.getUser.bind(usersService))
