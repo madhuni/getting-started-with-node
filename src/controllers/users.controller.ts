@@ -18,12 +18,14 @@ export class UsersController {
      * Same Routes can be chained together
      */
     this.router.route("/")
-      .get(usersService.getUsers)
-      .post(usersService.addUser);
+      .get(usersService.getUsers.bind(usersService));
+
+    this.router.route("/register")
+      .post(usersService.userValidationRules(), usersService.registerUser.bind(usersService));
 
     this.router.route("/:id")
-      .get(usersService.getUser)
-      .put(usersService.updateUser)
-      .delete(usersService.deleteUser);
+      .get(usersService.getUser.bind(usersService))
+      .put(usersService.updateUser.bind(usersService))
+      .delete(usersService.deleteUser.bind(usersService));
   }
 }
