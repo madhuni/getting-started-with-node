@@ -86,17 +86,17 @@ class UsersService {
   public userValidationRules(): ValidationChain[] {
     return [
       body("firstName")
-        .exists().withMessage("First name is required")
+        .notEmpty().withMessage("First name is required")
         .isLength({min: 4}).withMessage("First name must have a minimum of 4 characters"),
-      body("lastName", "Last name is required").exists(),
+      body("lastName", "Last name is required").notEmpty(),
       body("email")
-        .exists().withMessage("Email is required")
+        .notEmpty().withMessage("Email is required")
         .custom(commonService.checkEmailValidity).withMessage("Email is not valid"),
-      body("userName", "Username is required").exists(),
+      body("userName", "Username is required").notEmpty(),
       body("password")
-        .exists().withMessage("Password is required")
+        .notEmpty().withMessage("Password is required")
         .isLength({min: 8}).withMessage("Password should contain atleast 8 chars"),
-      body("confirmPassword", "Confirm password is required").exists()
+      body("confirmPassword", "Confirm password is required").notEmpty()
     ];
   }
 
@@ -139,60 +139,59 @@ class UsersService {
     if (!errors.isEmpty()) {
       console.log(errors);
       res.status(400).json(errors);
-    }
-
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const email = req.body.email;
-    const userName = req.body.userName;
-    const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
-
-    // check if both the passwords are matching
-    if (this.checkConfirmPassword(password, confirmPassword)) {
-      // check if user is already exists with the same email
-      this.checkIfEmailAlreadyExists(email)
-        .then((user: MongooseDocument) => {
-          if (!user) {
-            return this.checkIfUsernameAlreadyExists(userName);
-          } else {
-            res.status(400).json({
-              message: "Email already registered!"
-            });
-            return Promise.reject("Email was already registered. Hence terminating the request.");
-          }
-        })
-        .then((user: MongooseDocument) => {
-          if (!user) {
-            return this.generatePasswordHash(password);
-          } else {
-            res.status(400).json({
-              message: "Username already exists. Try another username."
-            });
-            return Promise.reject("Username was already existing. Hence terminating the request.");
-          }
-        })
-        .then((hash: string) => {
-          const newUser = new User({
-            firstName,
-            lastName,
-            email,
-            userName,
-            password: hash
-          });
-          return newUser.save();
-        })
-        .then((user: MongooseDocument) => {
-          res.status(200).json(user);
-        })
-        .catch((err) => {
-          console.log(chalk.red(err));
-          res.status(500).send();
-        });
     } else {
-      res.status(400).json({
-        message: "Passwords do not match"
-      });
+      const firstName = req.body.firstName;
+      const lastName = req.body.lastName;
+      const email = req.body.email;
+      const userName = req.body.userName;
+      const password = req.body.password;
+      const confirmPassword = req.body.confirmPassword;
+      // check if both the passwords are matching
+      if (this.checkConfirmPassword(password, confirmPassword)) {
+        // check if user is already exists with the same email
+        this.checkIfEmailAlreadyExists(email)
+          .then((user: MongooseDocument) => {
+            if (!user) {
+              return this.checkIfUsernameAlreadyExists(userName);
+            } else {
+              res.status(400).json({
+                message: "Email already registered!"
+              });
+              return Promise.reject("Email was already registered. Hence terminating the request.");
+            }
+          })
+          .then((user: MongooseDocument) => {
+            if (!user) {
+              return this.generatePasswordHash(password);
+            } else {
+              res.status(400).json({
+                message: "Username already exists. Try another username."
+              });
+              return Promise.reject("Username was already existing. Hence terminating the request.");
+            }
+          })
+          .then((hash: string) => {
+            const newUser = new User({
+              firstName,
+              lastName,
+              email,
+              userName,
+              password: hash
+            });
+            return newUser.save();
+          })
+          .then((user: MongooseDocument) => {
+            res.status(200).json(user);
+          })
+          .catch((err) => {
+            console.log(chalk.red(err));
+            res.status(500).send();
+          });
+      } else {
+        res.status(400).json({
+          message: "Passwords do not match"
+        });
+      }
     }
   }
 
