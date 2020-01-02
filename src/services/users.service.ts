@@ -187,6 +187,7 @@ class UsersService {
         })
         .catch((err) => {
           console.log(chalk.red(err));
+          res.json(500).send();
         });
     } else {
       res.status(400).json({
