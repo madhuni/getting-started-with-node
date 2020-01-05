@@ -140,12 +140,7 @@ class UsersService {
       console.log(errors);
       res.status(400).json(errors);
     } else {
-      const firstName = req.body.firstName;
-      const lastName = req.body.lastName;
-      const email = req.body.email;
-      const userName = req.body.userName;
-      const password = req.body.password;
-      const confirmPassword = req.body.confirmPassword;
+      const { firstName, lastName, email, userName, password, confirmPassword } = req.body;
       // check if both the passwords are matching
       if (this.checkConfirmPassword(password, confirmPassword)) {
         // check if user is already exists with the same email
