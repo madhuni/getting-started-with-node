@@ -15,6 +15,7 @@
         "space-before-function-paren": [true, "never"],
         "member-ordering": false,
         "no-string-literal": false,
+        "no-shadowed-variable": false,
         "ordered-imports": [
             true,
             {
