@@ -1,5 +1,6 @@
 import express, { Application, Router } from "express";
 
+import { authMiddleware } from "../middleware/auth.middleware";
 import { usersService } from "../services";
 
 export class UsersController {
@@ -12,6 +13,7 @@ export class UsersController {
   }
 
   private setupRoutes(): void {
+    this.app.use("/api/users", authMiddleware);
     this.app.use("/api/users", this.router);
 
     this.router.route("/")
