@@ -1,7 +1,7 @@
 import { SessionOptions } from "express-session";
 
 const SESSION_NAME = "_sid"; // name of the session being created
-const COOKIE_LIFETIME = 10000; // 1s,
+const COOKIE_LIFETIME = 1000 * 60 * 60; // 1 hour,
 const SESSION_SECRET = "some little secret";
 
 export const options: SessionOptions = {
