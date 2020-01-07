@@ -11,7 +11,7 @@ import { options as corsConfig } from "./config/cors.config";
 import { dbOptions, localConnectionString } from "./config/db.config";
 import { setupPassportStrategy } from "./config/passport.config";
 import { options as sessionConfig } from "./config/session.config";
-import { AuthController, CoursesController, LessonsController, MainController, UsersController } from "./controllers";
+import { AuthController, MainController, UsersController } from "./controllers";
 import { logIncomingRequestDetails } from "./middleware";
 
 class App {
@@ -19,8 +19,6 @@ class App {
   public app: Application;
   public authController!: AuthController;
   public mainController!: MainController;
-  public lessonsController!: LessonsController;
-  public coursesController!: CoursesController;
   public usersController!: UsersController;
 
   constructor() {
@@ -64,8 +62,6 @@ class App {
   private setControllers(): void {
     this.authController = new AuthController(this.app);
     this.mainController = new MainController(this.app);
-    this.lessonsController = new LessonsController(this.app);
-    this.coursesController = new CoursesController(this.app);
     this.usersController = new UsersController(this.app);
   }
 }
