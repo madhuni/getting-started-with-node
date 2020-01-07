@@ -44,3 +44,4 @@ testem.log
 Thumbs.db
 package-lock.json
 logger.txt
+checklist.md
