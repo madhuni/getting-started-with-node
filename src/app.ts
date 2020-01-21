@@ -3,13 +3,13 @@ import chalk from "chalk";
 import cors from "cors";
 import express, { Application } from "express";
 import session from "express-session";
-import mongoose, { Mongoose } from "mongoose";
+// import mongoose, { Mongoose } from "mongoose";
 import { MysqlError } from "mysql";
 import passport from "passport";
 import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
-import { dbOptions, localConnectionString } from "./config/db.config";
+// import { dbOptions, localConnectionString } from "./config/db.config";
 import { connection } from "./config/mysql.config";
 import { setupPassportStrategy } from "./config/passport.config";
 import { options as sessionConfig } from "./config/session.config";
@@ -27,7 +27,7 @@ class App {
     this.app = express();
     setupPassportStrategy(passport); // setup passport strategy before setting up the middlewares
     this.setMiddlewares();
-    this.setMongoConfig();
+    // this.setMongoConfig();
     this.setMysqlConnection();
     this.setControllers();
   }
@@ -43,24 +43,25 @@ class App {
     this.app.use("/assets", express.static(path.join(__dirname + "/public")));
   }
 
-  private setMongoConfig(): void {
-    mongoose.connect(localConnectionString, dbOptions)
-      .then((res: Mongoose) => {
-        console.log(
-          chalk.green(`Connected to MongoDB successfully!`)
-        );
-      })
-      .catch((err: Error) => {
-        console.log(chalk.red(`Unable to Connect to the MongoDB! Terminating the process.`), err);
-        process.exit(1);
-      });
+  /** Keeping the code for future reference */
+  // private setMongoConfig(): void {
+  //   mongoose.connect(localConnectionString, dbOptions)
+  //     .then((res: Mongoose) => {
+  //       console.log(
+  //         chalk.green(`Connected to MongoDB successfully!`)
+  //       );
+  //     })
+  //     .catch((err: Error) => {
+  //       console.log(chalk.red(`Unable to Connect to the MongoDB! Terminating the process.`), err);
+  //       process.exit(1);
+  //     });
 
-    mongoose.connection.on("disconnected", () => {
-      console.error(
-        chalk.red("MongoDB disconnected!")
-      );
-    });
-  }
+  //   mongoose.connection.on("disconnected", () => {
+  //     console.error(
+  //       chalk.red("MongoDB disconnected!")
+  //     );
+  //   });
+  // }
 
   private setMysqlConnection(): void {
     connection.connect((err: MysqlError) => {
