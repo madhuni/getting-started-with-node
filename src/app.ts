@@ -4,11 +4,13 @@ import cors from "cors";
 import express, { Application } from "express";
 import session from "express-session";
 import mongoose, { Mongoose } from "mongoose";
+import { MysqlError } from "mysql";
 import passport from "passport";
 import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
 import { dbOptions, localConnectionString } from "./config/db.config";
+import { connection } from "./config/mysql.config";
 import { setupPassportStrategy } from "./config/passport.config";
 import { options as sessionConfig } from "./config/session.config";
 import { AuthController, MainController, UsersController } from "./controllers";
@@ -26,6 +28,7 @@ class App {
     setupPassportStrategy(passport); // setup passport strategy before setting up the middlewares
     this.setMiddlewares();
     this.setMongoConfig();
+    this.setMysqlConnection();
     this.setControllers();
   }
 
@@ -56,6 +59,23 @@ class App {
       console.error(
         chalk.red("MongoDB disconnected!")
       );
+    });
+  }
+
+  private setMysqlConnection(): void {
+    connection.connect((err: MysqlError) => {
+      if (err) {
+        console.error(chalk.red(`Unable to Connect to the MYSQL! Terminating the process.`));
+        process.exit(1);
+      }
+      console.log(chalk.green(`Connected to MYSQL successfully.`));
+    });
+
+    connection.on("end", (err: MysqlError) => {
+      if (err) {
+        console.error(chalk.red(err));
+      }
+      console.log(chalk.red("MYSQL connection ended!"));
     });
   }
 
