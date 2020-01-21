@@ -8,7 +8,7 @@ import passport from "passport";
 import * as path from "path";
 
 import { options as corsConfig } from "./config/cors.config";
-import { connection } from "./config/mysql.config";
+import { connection as MySQL } from "./config/mysql.config";
 import { setupPassportStrategy } from "./config/passport.config";
 import { options as sessionConfig } from "./config/session.config";
 import { AuthController, MainController, UsersController } from "./controllers";
@@ -41,7 +41,7 @@ class App {
   }
 
   private setMysqlConnection(): void {
-    connection.connect((err: MysqlError) => {
+    MySQL.connect((err: MysqlError) => {
       if (err) {
         console.error(chalk.red(`Unable to Connect to the MYSQL! Terminating the process.`));
         process.exit(1);
@@ -49,7 +49,7 @@ class App {
       console.log(chalk.green(`Connected to MYSQL successfully.`));
     });
 
-    connection.on("end", (err: MysqlError) => {
+    MySQL.on("end", (err: MysqlError) => {
       if (err) {
         console.error(chalk.red(err));
       }
