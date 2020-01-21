@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { PassportStatic } from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.old";
 
 export function setupPassportStrategy(passport: PassportStatic) {
   passport.use(new LocalStrategy((username: string, password: string, done: CallableFunction) => {

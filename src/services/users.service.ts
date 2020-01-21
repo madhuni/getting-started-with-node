@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { body, ValidationChain, validationResult } from "express-validator";
 import { MongooseDocument } from "mongoose";
 
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.old";
 
 import { commonService } from "./index";
 
