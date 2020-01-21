@@ -2,8 +2,10 @@ import bcrypt from "bcrypt";
 import chalk from "chalk";
 import { Request, Response } from "express";
 import { body, ValidationChain, validationResult } from "express-validator";
-import { MongooseDocument } from "mongoose";
+import { MysqlError } from "mysql";
 
+import { connection as MySQL } from "../config/mysql.config";
+import { IResultPacket } from "../interfaces/mysql.interface";
 import { User } from "../models/user.model";
 
 import { commonService } from "./index";
@@ -44,15 +46,16 @@ class UsersService {
    *
    * @private
    * @param {string} email
-   * @returns {Promise<MongooseDocument>}
+   * @returns {Promise<User[]>}
    */
-  private checkIfEmailAlreadyExists(email: string): Promise<MongooseDocument> {
+  private checkIfEmailAlreadyExists(email: string): Promise<User[]> {
     return new Promise((resolve, reject) => {
-      User.findOne({email}, (err: Error, user: MongooseDocument) => {
+      const sqlQuery = `SELECT * FROM users WHERE email = ${MySQL.escape(email)}`;
+      MySQL.query(sqlQuery, (err: MysqlError | null, results?: User[]) => {
         if (err) {
           reject("Error occured while finding the user in db");
         } else {
-          resolve(user);
+          resolve(results);
         }
       });
     });
@@ -64,15 +67,39 @@ class UsersService {
    *
    * @private
    * @param {string} userName
-   * @returns {Promise<MongooseDocument>}
+   * @returns {Promise<User[]>}
    */
-  private checkIfUsernameAlreadyExists(userName: string): Promise<MongooseDocument> {
+  private checkIfUsernameAlreadyExists(userName: string): Promise<User[]> {
     return new Promise((resolve, reject) => {
-      User.findOne({userName}, (err: Error, user: MongooseDocument) => {
+      const sqlQuery = `SELECT * FROM users WHERE userName = ${MySQL.escape(userName)}`;
+      MySQL.query(sqlQuery, (err: MysqlError | null, results?: User[]) => {
         if (err) {
           reject("Error occured while finding the user in db");
         } else {
-          resolve(user);
+          resolve(results);
+        }
+      });
+    });
+  }
+
+  /**
+   * Provided the `newUser` to be created, this method will create a new user in DB.
+   *
+   * @private
+   * @param {User} newUser
+   * @returns {Promise<User>}
+   * @memberof UsersService
+   */
+  private createNewUser(newUser: User): Promise<User> {
+    return new Promise((resolve, reject) => {
+      const sqlQuery = `INSERT INTO users set ${MySQL.escape(newUser)}`;
+      MySQL.query(sqlQuery, (err: MysqlError | null, results: IResultPacket) => {
+        if (err) {
+          reject(err.sqlMessage);
+        } else {
+          const createdUser: User = {...newUser, id: results.insertId};
+          delete createdUser.password;
+          resolve(createdUser);
         }
       });
     });
@@ -101,29 +128,37 @@ class UsersService {
   }
 
   public getUsers(req: Request, res: Response): void {
-    User.find({}, (err: Error, users: MongooseDocument) => {
+    const sqlQuery = `SELECT id, firstName, lastName, email, userName FROM users`;
+    MySQL.query(sqlQuery, (err: MysqlError, results: User[]) => {
       if (err) {
         res.status(400).json({
           message: err.message
         });
+        return;
       }
       res.status(200).json({
-        data: users
+        data: results
       });
     });
   }
 
   public getUser(req: Request, res: Response): void {
     const _id = req.params.id;
-    User.findOne({ _id }, (err: Error, user: MongooseDocument) => {
+    const sqlQuery = `
+      SELECT id, firstName, lastName, email, userName
+      FROM users
+      WHERE id = ${MySQL.escape(_id)}
+    `;
+    MySQL.query(sqlQuery, (err: MysqlError, results: User[]) => {
       if (err) {
-        if (!user) {
-          res.status(404).json({ message: "User not found" });
-        } else {
-          res.status(400).json({ message: err.message });
-        }
+        res.status(400).json({ message: err.message });
+        return;
       }
-      res.status(200).json(user);
+      if (!results.length) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      res.status(200).json(results[0]);
     });
   }
 
@@ -145,8 +180,8 @@ class UsersService {
       if (this.checkConfirmPassword(password, confirmPassword)) {
         // check if user is already exists with the same email
         this.checkIfEmailAlreadyExists(email)
-          .then((user: MongooseDocument) => {
-            if (!user) {
+          .then((users: User[]) => {
+            if (!users.length) {
               return this.checkIfUsernameAlreadyExists(userName);
             } else {
               res.status(400).json({
@@ -155,8 +190,8 @@ class UsersService {
               return Promise.reject("Email was already registered. Hence terminating the request.");
             }
           })
-          .then((user: MongooseDocument) => {
-            if (!user) {
+          .then((user: User[]) => {
+            if (!user.length) {
               return this.generatePasswordHash(password);
             } else {
               res.status(400).json({
@@ -166,21 +201,23 @@ class UsersService {
             }
           })
           .then((hash: string) => {
-            const newUser = new User({
+            const newUser: User = {
+              id: -1,
               firstName,
               lastName,
               email,
               userName,
               password: hash
-            });
-            return newUser.save();
+            };
+            delete newUser.id;
+            return this.createNewUser(newUser);
           })
-          .then((user: MongooseDocument) => {
-            res.status(200).json(user);
+          .then((newUser: User) => {
+            res.status(200).json(newUser);
           })
           .catch((err) => {
             console.log(chalk.red(err));
-            res.status(500).send();
+            res.status(500).json({ message: "Internal Server Error" });
           });
       } else {
         res.status(400).json({
@@ -192,29 +229,35 @@ class UsersService {
 
   public updateUser(req: Request, res: Response): void {
     const _id = req.params.id;
-
-    User.findOneAndUpdate({ _id }, req.body, { new: true }, (err: Error, user: any) => {
+    const sqlQuery = `
+      UPDATE users
+      SET ${MySQL.escape(req.body)}
+      WHERE id = ${MySQL.escape(_id)}
+    `;
+    MySQL.query(sqlQuery, (err: MysqlError, results: IResultPacket) => {
       if (err) {
-        if (!user) {
-          res.status(404).json({ message: "User not found!" });
-        } else {
-          res.status(400).json({ message: err.message });
-        }
+        res.status(400).json({ message: err.message });
+        return;
       }
-
-      res.status(200).json(user);
+      if (results.affectedRows === 0) {
+        res.status(404).json({ message: "User not found!" });
+        return;
+      }
+      res.status(200).json({ message: "Details are updated." });
     });
   }
 
   public deleteUser(req: Request, res: Response): void {
     const _id = req.params.id;
-    User.findOneAndRemove({ _id }, (err: Error, user: any) => {
+    const sqlQuery = `DELETE FROM users WHERE id = ${MySQL.escape(_id)}`;
+    MySQL.query(sqlQuery, (err: MysqlError, results: IResultPacket) => {
       if (err) {
-        if (!user) {
-          res.status(404).json({ message: "User doesn't exists."});
-        } else {
-          res.status(400).json({ message: err.message });
-        }
+        res.status(400).json({ message: err.message });
+        return;
+      }
+      if (results.affectedRows === 0) {
+        res.status(404).json({ message: "User doesn't exists."});
+        return;
       }
       res.status(200).json({ message: `User is deleted.` });
     });

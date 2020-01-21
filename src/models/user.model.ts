@@ -1,21 +1,13 @@
 /**
- * From the mongoose docs: Models are fancy constructors
- * compiled from Schema definitions. An instance of a model
- * is called a document. Models are responsible for creating
- * and reading documents from the underlying MongoDB database.
+ * Interface for the User
+ * @export
+ * @interface User
  */
-
-import mongoose from "mongoose";
-
-const Schema = mongoose.Schema;
-
-// Creating a UserSchema
-const UserSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  userName: { type: String, required: true },
-  password: { type: String, required: true }
-});
-
-export const User = mongoose.model("User", UserSchema);
+export interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  password: string;
+}
