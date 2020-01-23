@@ -2,9 +2,9 @@ import chalk from "chalk";
 import figlet from "figlet";
 
 import app from "./app";
-import { HOST_NAME, PORT } from "./config/server.config";
+import { ServerConfig } from "./config/server.config";
 
-app.listen(PORT, HOST_NAME, () => {
+app.listen(ServerConfig.PORT, ServerConfig.HOST_NAME, () => {
   figlet("Welcome To Node Server", (err: any, data: any) => {
     if (err) {
       console.log("Something is wrong with Figlet.");
@@ -12,5 +12,5 @@ app.listen(PORT, HOST_NAME, () => {
     }
     console.log(data);
   });
-  console.log(chalk.green(`Server is up and running at http://${HOST_NAME}:${PORT}`));
+  console.log(chalk.green(`Server is up and running at http://${ServerConfig.HOST_NAME}:${ServerConfig.PORT}`));
 });
