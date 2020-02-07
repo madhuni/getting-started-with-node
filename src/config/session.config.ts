@@ -1,20 +1,17 @@
 import { SessionOptions } from "express-session";
 
-enum SessionConstants {
-  SESSION_NAME = "_sid", // name of the session being created
-  SESSION_SECRET = "some little secret"
-}
+import { envConfig } from "./env.config";
 
 export const options: SessionOptions = {
   cookie: {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60, // 1 hour
+    maxAge: envConfig.cookieMaxAge,
     path: "/",
     sameSite: false,
     secure: false
   },
-  name: SessionConstants.SESSION_NAME,
-  secret: SessionConstants.SESSION_SECRET,
+  name: envConfig.sessionName,
+  secret: envConfig.sessionSecret as string,
   resave: false,
   saveUninitialized: false,
   genid: (req) => {
